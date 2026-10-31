@@ -14,7 +14,8 @@ void main() {
 }
 
 const orange = Color(0xFFFF7043);
-const cream = Color(0xFFFFF9F5);
+const olive = Color(0xFF697A45);
+const cream = Color(0xFFFFF8E8);
 
 // -------------------- RECIPE MODEL --------------------
 
@@ -340,10 +341,11 @@ class RecipeHubApp extends StatelessWidget {
           theme: ThemeData(
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(
-              seedColor: orange,
+              seedColor: olive,
               brightness: Brightness.light,
-            ),
+            ).copyWith(secondary: orange),
             scaffoldBackgroundColor: cream,
+            cardColor: const Color(0xFFFFFCF4),
             appBarTheme: const AppBarTheme(
               backgroundColor: cream,
               foregroundColor: Color(0xFF292524),
@@ -353,9 +355,9 @@ class RecipeHubApp extends StatelessWidget {
           darkTheme: ThemeData(
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(
-              seedColor: orange,
+              seedColor: olive,
               brightness: Brightness.dark,
-            ),
+            ).copyWith(secondary: orange),
           ),
           home: const MainShell(),
         );
@@ -467,21 +469,89 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final store = context.watch<RecipeStore>();
     final featured = store.recipes.first;
+    final vibes = [
+      (
+        'Quick & easy',
+        'Under 30 minutes',
+        Icons.bolt_rounded,
+        store.recipes.where((recipe) => recipe.minutes <= 30).toList(),
+        const Color(0xFFE9EFD9),
+      ),
+      (
+        'Indian comfort',
+        'Full of flavor',
+        Icons.local_fire_department_rounded,
+        store.recipes.where((recipe) => recipe.category == 'Indian').toList(),
+        const Color(0xFFF9E6D7),
+      ),
+      (
+        'Sweet moments',
+        'A little treat',
+        Icons.cookie_outlined,
+        store.recipes.where((recipe) => recipe.category == 'Dessert').toList(),
+        const Color(0xFFF3E7EF),
+      ),
+      (
+        'Your favorites',
+        'Saved with love',
+        Icons.favorite_rounded,
+        store.recipes.where((recipe) => store.isFavorite(recipe.id)).toList(),
+        const Color(0xFFF9E4DF),
+      ),
+    ];
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(18, 8, 18, 24),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
       children: [
-        const Text(
-          'Good food, good mood! 👋',
-          style: TextStyle(
-            fontSize: 23,
-            fontWeight: FontWeight.w800,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'YOUR KITCHEN, YOUR STORY',
+                    style: TextStyle(
+                      color: olive,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.6,
+                    ),
+                  ),
+                  const SizedBox(height: 7),
+                  Text(
+                    'What sounds good today?',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontFamily: 'serif',
+                          fontWeight: FontWeight.w700,
+                          height: 1.1,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8EDD9),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(
+                Icons.restaurant_menu_rounded,
+                color: olive,
+                size: 23,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: 7),
         Text(
-          'What would you like to cook today?',
-          style: TextStyle(color: Theme.of(context).hintColor),
+          'A little inspiration for your next delicious meal.',
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 13,
+          ),
         ),
         const SizedBox(height: 18),
         SearchBox(
@@ -494,108 +564,207 @@ class HomeScreen extends StatelessWidget {
             );
           },
         ),
-        const SizedBox(height: 22),
-        const SectionTitle('Featured recipe'),
-        const SizedBox(height: 10),
+        const SizedBox(height: 24),
+        _HomeSectionHeader(
+          eyebrow: 'HANDPICKED FOR YOU',
+          title: 'Today’s pick',
+          trailing: '1 recipe',
+        ),
+        const SizedBox(height: 12),
         GestureDetector(
           onTap: () => openRecipe(context, featured),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(22),
-            child: Stack(
-              children: [
-                Image(
-                  image: recipeImageProvider(featured.image),
-                  height: 190,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) {
-                    return Container(
-                      height: 190,
-                      color: Colors.orange.shade100,
-                      child: const Icon(
-                        Icons.restaurant,
-                        size: 60,
+            borderRadius: BorderRadius.circular(26),
+            child: SizedBox(
+              height: 250,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image(
+                    image: recipeImageProvider(featured.image),
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => ColoredBox(
+                      color: const Color(0xFFE9D7BB),
+                      child: Icon(
+                        Icons.restaurant_rounded,
+                        size: 64,
+                        color: olive.withValues(alpha: 0.7),
                       ),
-                    );
-                  },
-                ),
-                Container(
-                  height: 190,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                      colors: [
-                        Colors.black87,
-                        Colors.transparent,
+                    ),
+                  ),
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0x22000000),
+                          Color(0x00000000),
+                          Color(0xCC000000),
+                        ],
+                        stops: [0, 0.32, 1],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 14,
+                    left: 14,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFFCF4).withValues(alpha: 0.94),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.auto_awesome, size: 14, color: olive),
+                          SizedBox(width: 6),
+                          Text(
+                            'TODAY’S PICK',
+                            style: TextStyle(
+                              color: olive,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Material(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      shape: const CircleBorder(),
+                      child: IconButton(
+                        tooltip: store.isFavorite(featured.id)
+                            ? 'Remove from favorites'
+                            : 'Save to favorites',
+                        onPressed: () => store.toggleFavorite(featured.id),
+                        icon: Icon(
+                          store.isFavorite(featured.id)
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 18,
+                    right: 18,
+                    bottom: 18,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          featured.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 25,
+                            fontWeight: FontWeight.w800,
+                            height: 1.05,
+                            shadows: [
+                              Shadow(color: Colors.black26, blurRadius: 8),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 7),
+                        Text(
+                          featured.description,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            shadows: [
+                              Shadow(color: Colors.black38, blurRadius: 8),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            _HeroMeta(
+                              icon: Icons.star_rounded,
+                              label: '${featured.rating}',
+                            ),
+                            const SizedBox(width: 14),
+                            _HeroMeta(
+                              icon: Icons.schedule_rounded,
+                              label: '${featured.minutes} min',
+                            ),
+                            const SizedBox(width: 14),
+                            _HeroMeta(
+                              icon: Icons.restaurant_menu_rounded,
+                              label: featured.category,
+                            ),
+                            const Spacer(),
+                            const Icon(
+                              Icons.arrow_outward_rounded,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
-                ),
-                Positioned(
-                  left: 16,
-                  right: 16,
-                  bottom: 16,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'TODAY’S PICK',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                      Text(
-                        featured.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        '⭐ ${featured.rating}  •  ${featured.minutes} min',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-        const SizedBox(height: 22),
-        const SectionTitle('Browse categories'),
+        const SizedBox(height: 26),
+        _HomeSectionHeader(
+          eyebrow: 'FIND YOUR NEXT FAVORITE',
+          title: 'Browse by mood',
+          trailing: 'See all',
+          onTrailingTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const CategoriesScreen(),
+              ),
+            );
+          },
+        ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 44,
+          height: 48,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            children: [
-              'All',
-              'Breakfast',
-              'Indian',
-              'Italian',
-              'Chinese',
-              'Dessert',
-              'Drinks',
-            ].map((category) {
+            children: const [
+              ('All recipes', Icons.restaurant_rounded, 'All'),
+              ('Breakfast', Icons.free_breakfast_rounded, 'Breakfast'),
+              ('Indian', Icons.rice_bowl_rounded, 'Indian'),
+              ('Italian', Icons.local_pizza_rounded, 'Italian'),
+              ('Chinese', Icons.ramen_dining_rounded, 'Chinese'),
+              ('Dessert', Icons.cake_rounded, 'Dessert'),
+              ('Drinks', Icons.local_cafe_rounded, 'Drinks'),
+            ].map((item) {
               return Padding(
-                padding: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.only(right: 9),
                 child: ActionChip(
-                  label: Text(category),
-                  backgroundColor:
-                      category == 'All' ? orange.withOpacity(0.15) : null,
+                  avatar: Icon(item.$2, size: 17, color: olive),
+                  label: Text(item.$1),
+                  backgroundColor: const Color(0xFFFFFCF4),
+                  side: BorderSide(color: olive.withValues(alpha: 0.12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => CategoryResultsScreen(
-                          category: category,
-                        ),
+                        builder: (_) =>
+                            CategoryResultsScreen(category: item.$3),
                       ),
                     );
                   },
@@ -604,20 +773,65 @@ class HomeScreen extends StatelessWidget {
             }).toList(),
           ),
         ),
-        const SizedBox(height: 22),
-        const SectionTitle('Popular recipes'),
-        const SizedBox(height: 10),
-        RecipeGrid(
-          recipes: store.recipes.take(6).toList(),
+        const SizedBox(height: 26),
+        const _HomeSectionHeader(
+          eyebrow: 'A COLLECTION FOR EVERY CRAVING',
+          title: 'Your recipe vibes ✨',
         ),
-        const SizedBox(height: 18),
-        FilledButton.icon(
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 154,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: vibes.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 11),
+            itemBuilder: (context, index) {
+              final vibe = vibes[index];
+              return _RecipeVibeCard(
+                title: vibe.$1,
+                subtitle: vibe.$2,
+                icon: vibe.$3,
+                count: vibe.$4.length,
+                color: vibe.$5,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => RecipeCollectionScreen(
+                        title: vibe.$1,
+                        recipes: vibe.$4,
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 26),
+        _HomeSectionHeader(
+          eyebrow: 'SOMETHING GOOD IS COOKING',
+          title: 'Popular recipes',
+          trailing: '${store.recipes.length} recipes',
+        ),
+        const SizedBox(height: 12),
+        RecipeGrid(recipes: store.recipes.take(6).toList()),
+        const SizedBox(height: 20),
+        OutlinedButton.icon(
           onPressed: store.loading ? null : store.fetchOnlineRecipes,
-          icon: const Icon(Icons.cloud_download_outlined),
+          icon: const Icon(Icons.travel_explore_rounded),
           label: Text(
             store.loading
-                ? 'Loading online recipes...'
-                : 'Discover online recipes',
+                ? 'Finding fresh inspiration...'
+                : 'Discover more recipes',
+          ),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: olive,
+            side: BorderSide(color: olive.withValues(alpha: 0.28)),
+            padding: const EdgeInsets.symmetric(vertical: 15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
         ),
         if (store.apiError != null)
@@ -629,6 +843,175 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _HomeSectionHeader extends StatelessWidget {
+  const _HomeSectionHeader({
+    required this.eyebrow,
+    required this.title,
+    this.trailing,
+    this.onTrailingTap,
+  });
+
+  final String eyebrow;
+  final String title;
+  final String? trailing;
+  final VoidCallback? onTrailingTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                eyebrow,
+                style: const TextStyle(
+                  color: olive,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.3,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontFamily: 'serif',
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ],
+          ),
+        ),
+        if (trailing != null && onTrailingTap == null)
+          Padding(
+            padding: const EdgeInsets.only(left: 8, bottom: 2),
+            child: Text(
+              trailing!,
+              style: const TextStyle(
+                color: olive,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          )
+        else if (trailing != null)
+          TextButton(
+            onPressed: onTrailingTap,
+            style: TextButton.styleFrom(
+              foregroundColor: olive,
+              padding: const EdgeInsets.only(left: 8, bottom: 2),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              trailing!,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _HeroMeta extends StatelessWidget {
+  const _HeroMeta({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 15, color: const Color(0xFFFFD16C)),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RecipeVibeCard extends StatelessWidget {
+  const _RecipeVibeCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.count,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final int count;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 148,
+      child: Material(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(22),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(22),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(17),
+                  ),
+                  child: Icon(icon, color: olive, size: 24),
+                ),
+                const Spacer(),
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '$count recipes · $subtitle',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -737,6 +1120,42 @@ class FavoritesScreen extends StatelessWidget {
           ),
         RecipeGrid(recipes: items),
       ],
+    );
+  }
+}
+
+class RecipeCollectionScreen extends StatelessWidget {
+  const RecipeCollectionScreen({
+    super.key,
+    required this.title,
+    required this.recipes,
+  });
+
+  final String title;
+  final List<Recipe> recipes;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: ListView(
+        padding: const EdgeInsets.all(18),
+        children: [
+          Text(
+            '${recipes.length} ${recipes.length == 1 ? 'recipe' : 'recipes'} to explore',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (recipes.isEmpty)
+            const EmptyState(
+              message: 'No recipes in this collection just yet.',
+            )
+          else
+            RecipeGrid(recipes: recipes),
+        ],
+      ),
     );
   }
 }
